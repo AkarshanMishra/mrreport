@@ -1,0 +1,73 @@
+{
+  "masterDB": {
+    "hqs": [
+      {
+        "id": 1780566097690,
+        "name": "KANPUR"
+      }
+    ],
+    "products": [
+      {
+        "id": 1780566123641,
+        "name": "P",
+        "salts": "NA"
+      }
+    ],
+    "doctors": [
+      {
+        "id": 1780566154265,
+        "name": "K",
+        "spec": "INTAVIST",
+        "hospital": "KK",
+        "loc": "KANPUR",
+        "phone": "1478"
+      }
+    ],
+    "chemists": [
+      {
+        "id": 1780566174423,
+        "name": "K",
+        "person": "K",
+        "loc": "KANPUR",
+        "phone": "1478"
+      }
+    ]
+  },
+  "visitsDB": [
+    {
+      "id": 1780567054778,
+      "date": "2026-06-04",
+      "hq": "KANPUR",
+      "type": "Doctor",
+      "workWith": "Self",
+      "client": "K (KK)",
+      "linkedChemist": "K (KANPUR)",
+      "products": "P",
+      "pob": 0,
+      "expense": 0,
+      "remarks": "None"
+    }
+  ],
+  "users": [
+    {
+      "id": 1780566047351,
+      "name": "ADMIN",
+      "email": "admin@admin.com",
+      "username": "admin",
+      "role": "Admin",
+      "passwordHash": "507bb549aa75df0544a7371124dd6445d47df51cce0db1c11e73619c5b53b8b50c9311ced4c613d0f6c39907637c556d88e89981e6307ea3b5eef2962912162c",
+      "passwordSalt": "e45a9a8728ebe91a52ecf4a2d9094906",
+      "createdAt": "2026-06-04T09:40:47.351Z"
+    },
+    {
+      "id": 1780567986532,
+      "name": "MR",
+      "email": "mr@mr.com",
+      "username": "mr",
+      "role": "MR",
+      "passwordHash": "5dd95663f36911742bae6c10ccea932a9be2096198d01df31639354f7c16644aca7cd8f5ca27b7beb585f781383af7d885a1cd37c7fc2788bcaa0abeae3176f4",
+      "passwordSalt": "e05f87648805ae370f579a59e580a136",
+      "createdAt": "2026-06-04T10:13:06.532Z"
+    }
+  ]
+}

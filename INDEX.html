@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR CRM - Advanced Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="STYLE.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4 shadow-sm">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div class="d-flex align-items-center">
+                <img src="Picture1.jpg" class="logo-img me-3" alt="BIOXEN HEALTH CARE Logo">
+                <div>
+                    <span class="navbar-brand mb-0 h1">BIOXEN HEALTH CARE</span>
+                    <div class="text-white-50 small">MR Advanced CRM Tracker</div>
+                </div>
+            </div>
+            <div id="userControls" class="d-none align-items-center gap-2">
+                <span class="text-white" id="navUsername"></span>
+                <span class="badge bg-info" id="navRole"></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logoutUser()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div id="authSection" class="mb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="card shadow-sm auth-card">
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <h2 class="mb-1">Welcome to MR CRM</h2>
+                                <p class="text-muted mb-0">Login or create a user to keep your dashboard and reports saved on the server.</p>
+                            </div>
+
+                            <div class="d-flex justify-content-center gap-2 mb-4 flex-wrap">
+                                <button id="btnLoginMode" type="button" class="btn btn-sm btn-outline-primary auth-mode-btn active" onclick="setAuthMode('login')">Login</button>
+                                <button id="btnRegisterMode" type="button" class="btn btn-sm btn-outline-primary auth-mode-btn" onclick="setAuthMode('register')">Create User</button>
+                            </div>
+
+                            <div id="loginPanel">
+                                <form id="loginForm" onsubmit="loginUser(event)">
+                                    <div class="mb-3">
+                                        <label class="form-label">Email or Username</label>
+                                        <input type="text" id="loginIdentifier" class="form-control" placeholder="Enter email or username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                                </form>
+                            </div>
+
+                            <div id="registerPanel" class="d-none">
+                                <form id="registerForm" onsubmit="registerUser(event)">
+                                    <div class="mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" id="registerName" class="form-control" placeholder="Your full name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" id="registerEmail" class="form-control" placeholder="you@example.com" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" id="registerUsername" class="form-control" placeholder="Create a username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">User Role</label>
+                                        <select id="registerRole" class="form-select" required>
+                                            <option value="MR">MR (Add & Edit Only)</option>
+                                            <option value="Admin">Admin (Full Access)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" id="registerPassword" class="form-control" placeholder="Create password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Confirm Password</label>
+                                        <input type="password" id="registerPasswordConfirm" class="form-control" placeholder="Confirm password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Create User</button>
+                                </form>
+                            </div>
+
+                            <div class="text-center text-muted small mt-3">Data and credentials are saved permanently on the server.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="appSection" class="d-none">
+            <section class="mb-4">
+                <div class="card p-3 shadow-sm bg-white border-0">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                        <div>
+                            <h4 class="mb-1">Dashboard Access</h4>
+                            <p class="text-muted mb-0">Use the tabs below to log visits, manage master data, and review reports.</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary" id="welcomeBadge">Hello</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded shadow-sm" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-log">1. Log Visit</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-master">2. Master Data Setup</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-reports" onclick="applyFilter()">3. Detailed Dashboard</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-details" onclick="renderDetailsView()">4. View Details</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-log">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-8">
+                            <div class="card border-top border-primary border-4">
+                                <div class="card-body p-4">
+                                    <h4 class="mb-4">Log Daily Field Work</h4>
+                                    <form id="visitForm">
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Date</label>
+                                                <input type="date" id="v_date" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Headquarter / Area</label>
+                                                <select id="v_hq" class="form-select" required></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Visit Type</label>
+                                            <select id="v_type" class="form-select bg-light" onchange="toggleVisitType()" required>
+                                                <option value="Doctor">Doctor Visit</option>
+                                                <option value="Chemist">Chemist Visit</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Work With</label>
+                                            <select id="v_work_with" class="form-select" onchange="toggleWorkWithOther()">
+                                                <option value="Self">Self</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div id="otherWorkWithWrap" class="mb-3 d-none">
+                                            <label class="form-label fw-bold">Specify Work With</label>
+                                            <input type="text" id="v_work_with_other" class="form-control" placeholder="Enter name or company">
+                                        </div>
+
+                                        <div id="div-doctor" class="p-3 bg-light rounded border mb-3">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold text-primary">Select Doctor</label>
+                                                <select id="v_doctor" class="form-select"></select>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <small class="text-muted">Not available? Add a doctor to Master Data.</small>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openMasterTab('doctor')">Add Doctor</button>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label fw-bold text-success">Linked Chemist (Where is the Rx going?)</label>
+                                                <select id="v_linked_chemist" class="form-select"></select>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">Not available? Add a chemist to Master Data.</small>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openMasterTab('chemist')">Add Chemist</button>
+                                            </div>
+                                        </div>
+
+                                        <div id="div-chemist" class="p-3 bg-light rounded border mb-3 d-none">
+                                            <div class="mb-2">
+                                                <label class="form-label fw-bold text-success">Select Chemist / Pharmacy</label>
+                                                <select id="v_chemist" class="form-select"></select>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">Not available? Add a chemist to Master Data.</small>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openMasterTab('chemist')">Add Chemist</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Products Detailed (Hold CTRL to select multiple)</label>
+                                            <select id="v_products" class="form-select" multiple size="4"></select>
+                                        </div>
+                                        <div class="text-end mb-3">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openMasterTab('product')">Add Product</button>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">POB Generated (₹)</label>
+                                                <input type="number" id="v_pob" class="form-control" value="0">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Daily Travel Expense (₹)</label>
+                                                <input type="number" id="v_expense" class="form-control" value="0">
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Remarks / Feedback</label>
+                                            <textarea id="v_remarks" class="form-control" rows="2" placeholder="Enter specific requests, clinical feedback, etc."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 fs-5">Save Full Report</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-master">
+                    <div class="row gy-4">
+                        <div class="col-lg-6">
+                            <div class="card border-top border-primary border-4 h-100">
+                                <div class="card-header bg-white fw-bold fs-5">📍 Add Headquarter / Area</div>
+                                <div class="card-body">
+                                    <form onsubmit="saveSimpleMaster(event, 'hqs', 'hq_input')">
+                                        <div class="mb-3">
+                                            <label class="master-form-label">HQ / Area Name</label>
+                                            <input type="text" id="hq_input" class="form-control form-control-sm" placeholder="e.g., South Delhi" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">Save HQ</button>
+                                    </form>
+                                    <hr>
+                                    <div id="list-hqs" class="list-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card border-top border-primary border-4 h-100">
+                                <div class="card-header bg-white fw-bold fs-5">🧾 Add Product</div>
+                                <div class="card-body">
+                                    <form onsubmit="saveProduct(event)">
+                                        <div class="mb-2">
+                                            <label class="master-form-label">Product Name</label>
+                                            <input type="text" id="product_input" class="form-control form-control-sm" placeholder="e.g., Aspirin" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="master-form-label">Salts / Ingredients</label>
+                                            <input type="text" id="product_salts" class="form-control form-control-sm" placeholder="e.g., Acetylsalicylic Acid 500mg" required>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1" id="productSubmitBtn">Save Product</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" id="productCancelBtn" onclick="cancelEditProduct()" style="display: none;">Cancel</button>
+                                        </div>
+                                    </form>
+                                    <hr>
+                                    <div id="list-products" class="list-container"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card border-top border-primary border-4 h-100">
+                                <div class="card-header bg-white fw-bold fs-5">👨‍⚕️ Add Doctor</div>
+                                <div class="card-body">
+                                    <form onsubmit="saveDoctor(event)">
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-12"><label class="master-form-label">Dr. Name</label><input type="text" id="d_name" class="form-control form-control-sm" required></div>
+                                            <div class="col-12"><label class="master-form-label">Specialisation</label>
+                                            <select id="d_spec" class="form-control form-control-sm" required>
+                                                <option value="">-- Select Specialisation --</option>
+                                                <option value="Cardiology">Cardiology</option>
+                                                <option value="Orthopedics">Orthopedics</option>
+                                                <option value="Neurology">Neurology</option>
+                                                <option value="Gastroenterology">Gastroenterology</option>
+                                                <option value="Pediatrics">Pediatrics</option>
+                                                <option value="Dermatology">Dermatology</option>
+                                                <option value="Psychiatry">Psychiatry</option>
+                                                <option value="ENT">ENT</option>
+                                                <option value="Ophthalmology">Ophthalmology</option>
+                                                <option value="Urology">Urology</option>
+                                                <option value="General Surgery">General Surgery</option>
+                                                <option value="Oncology">Oncology</option>
+                                                <option value="Pulmonology">Pulmonology</option>
+                                                <option value="Rheumatology">Rheumatology</option>
+                                                <option value="Endocrinology">Endocrinology</option>
+                                                <option value="Nephrology">Nephrology</option>
+                                                <option value="Hematology">Hematology</option>
+                                                <option value="Infectious Disease">Infectious Disease</option>
+                                                <option value="Anesthesia">Anesthesia</option>
+                                                <option value="Radiology">Radiology</option>
+                                                <option value="Physical Medicine">Physical Medicine</option>
+                                                <option value="General Practice">General Practice</option>
+                                                <option value="Other">Other (Specify)</option>
+                                            </select>
+                                            </div>
+                                            <div class="col-12 d-none" id="customSpecWrap"><label class="master-form-label">Please Specify Specialisation</label><input type="text" id="d_spec_custom" class="form-control form-control-sm" placeholder="e.g., Homeopathy, Ayurveda"></div>
+                                            <div class="col-6"><label class="master-form-label">Hospital Name</label><input type="text" id="d_hosp" class="form-control form-control-sm" required></div>
+                                            <div class="col-6"><label class="master-form-label">Location</label><input type="text" id="d_loc" class="form-control form-control-sm" required></div>
+                                            <div class="col-12"><label class="master-form-label">Phone No.</label><input type="text" id="d_phone" class="form-control form-control-sm"></div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1" id="doctorSubmitBtn">Save Doctor</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" id="doctorCancelBtn" onclick="cancelEditDoctor()" style="display: none;">Cancel</button>
+                                        </div>
+                                    </form>
+                                    <hr>
+                                    <div id="list-doctors" class="list-container"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card border-top border-primary border-4 h-100">
+                                <div class="card-header bg-white fw-bold fs-5">🏪 Add Chemist / Pharmacy</div>
+                                <div class="card-body">
+                                    <form onsubmit="saveChemist(event)">
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-12"><label class="master-form-label">Chemist Name</label><input type="text" id="c_name" class="form-control form-control-sm" required></div>
+                                            <div class="col-6"><label class="master-form-label">Contact Person</label><input type="text" id="c_person" class="form-control form-control-sm"></div>
+                                            <div class="col-6"><label class="master-form-label">Location</label><input type="text" id="c_loc" class="form-control form-control-sm" required></div>
+                                            <div class="col-12"><label class="master-form-label">Phone No.</label><input type="text" id="c_phone" class="form-control form-control-sm"></div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1" id="chemistSubmitBtn">Save Chemist</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" id="chemistCancelBtn" onclick="cancelEditChemist()" style="display: none;">Cancel</button>
+                                        </div>
+                                    </form>
+                                    <hr>
+                                    <div id="list-chemists" class="list-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-details">
+                    <div class="card border-top border-success border-4">
+                        <div class="card-body p-4">
+                            <h5 class="mb-4">Master Data Records - Detailed View</h5>
+                            <ul class="nav nav-tabs mb-4" role="tablist">
+                                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#details-doctors">👨‍⚕️ Doctors</button></li>
+                                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#details-products">🧾 Products</button></li>
+                                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#details-chemists">🏪 Chemists</button></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="details-doctors">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead><tr><th>Name</th><th>Specialisation</th><th>Hospital</th><th>Location</th><th>Phone</th><th>Action</th></tr></thead>
+                                            <tbody id="detailsDoctorsBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="details-products">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead><tr><th>Product Name</th><th>Salts / Ingredients</th><th>Action</th></tr></thead>
+                                            <tbody id="detailsProductsBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="details-chemists">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead><tr><th>Chemist Name</th><th>Contact Person</th><th>Location</th><th>Phone</th><th>Action</th></tr></thead>
+                                            <tbody id="detailsChemistsBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-reports">
+                    <div class="card border-top border-primary border-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+                                <div>
+                                    <h5 class="mb-1 report-company">Company: BIOXEN HEALTH CARE</h5>
+                                    <div class="text-muted">Detailed dashboard reports and export summary</div>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Date Filter</label>
+                                    <select id="filterType" class="form-select" onchange="applyFilter()">
+                                        <option value="all">All Time</option>
+                                        <option value="weekly">Last 7 Days</option>
+                                        <option value="monthly">This Month</option>
+                                        <option value="yearly">This Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                <div id="customDates" class="col-md-8 hidden">
+                                    <div class="row g-2">
+                                        <div class="col-sm-6"><label class="form-label fw-bold">Start Date</label><input type="date" id="startDate" class="form-control" onchange="applyFilter()"></div>
+                                        <div class="col-sm-6"><label class="form-label fw-bold">End Date</label><input type="date" id="endDate" class="form-control" onchange="applyFilter()"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-sm-4">
+                                    <div class="summary-card bg-blue">
+                                        <h6>Total Visits</h6>
+                                        <h3 id="sum-visits">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="summary-card bg-green">
+                                        <h6>Total POB</h6>
+                                        <h3 id="sum-pob">₹0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="summary-card bg-red">
+                                        <h6>Total Expense</h6>
+                                        <h3 id="sum-expense">₹0</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-3">
+                                <button class="btn btn-outline-primary" onclick="applyFilter()">Refresh Report</button>
+                                <button class="btn btn-success" onclick="exportToExcel()">Export to Excel</button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Work With</th>
+                                            <th>Client</th>
+                                            <th>Linked Chemist</th>
+                                            <th>Products</th>
+                                            <th>POB</th>
+                                            <th>Expense</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="SCRIPT.js"></script>
+</body>
+</html>
