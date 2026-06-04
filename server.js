@@ -52,7 +52,14 @@ function writeDB(db) {
 }
 
 function sendJSON(res, statusCode, body) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+  // Include CORS headers so the API can be used from GitHub Pages or other origins.
+  const headers = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
+  res.writeHead(statusCode, headers);
   res.end(JSON.stringify(body));
 }
 
@@ -213,6 +220,17 @@ async function handleApi(req, res) {
 }
 
 const server = http.createServer((req, res) => {
+  // Handle CORS preflight for API routes so the frontend hosted on github.io can call the API.
+  if (req.method === 'OPTIONS' && req.url.startsWith('/api/')) {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    res.end();
+    return;
+  }
+
   if (req.url.startsWith('/api/')) {
     handleApi(req, res);
     return;
