@@ -1,5 +1,10 @@
 // MR CRM frontend backed by the local Node server.
 
+// Configurable API base for remote server.
+// Provide a public URL (no trailing slash) by setting window.MR_API_BASE before SCRIPT.js loads,
+// or leave blank to use relative paths (useful for local testing).
+const API_BASE = (window.MR_API_BASE && String(window.MR_API_BASE).replace(/\/$/, '')) || '';
+
 let masterDB = { hqs: [], products: [], doctors: [], chemists: [] };
 let visitsDB = [];
 let activeUser = JSON.parse(localStorage.getItem('mr_advanced_activeUser')) || null;
@@ -22,7 +27,12 @@ function bindStaticEvents() {
 }
 
 async function apiRequest(path, options = {}) {
-    const response = await fetch(path, {
+    // Normalise path
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    // If the path is already an absolute URL, use it directly.
+    const url = /^https?:\/\//.test(normalizedPath) ? normalizedPath : (API_BASE ? API_BASE + normalizedPath : normalizedPath);
+
+    const response = await fetch(url, {
         headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
         ...options
     });
@@ -443,7 +453,7 @@ function toggleVisitType() {
 }
 
 function populateDropdowns() {
-    document.getElementById('v_hq').innerHTML = '<option value="">-- Select HQ --</option>' + masterDB.hqs.map(i => `<option value="${escapeHTML(i.name)}">${escapeHTML(i.name)}</option>`).join('');
+    document.getElementById('v_hq').innerHTML = '<option value="">-- Select HQ --</option>' + masterDB.hqs.map(i => `<option value="${escapeHTML(i.name)}">${escapeHTML(i.name)}</option>`).join('')
     renderDoctorDropdown();
     renderLinkedChemistDropdown();
     renderChemistDropdown();
